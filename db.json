@@ -1,0 +1,28 @@
+{
+  "products": [
+    {
+      "id": 2,
+      "name": "Printerr",
+      "price": 300,
+      "quantity": 100,
+      "selected": true,
+      "available": false
+    },
+    {
+      "id": 4,
+      "name": "Smartphone",
+      "price": 1200,
+      "quantity": 100,
+      "selected": false,
+      "available": false
+    },
+    {
+      "id": 5,
+      "name": "Mousee",
+      "price": "20",
+      "quantity": "1",
+      "selected": true,
+      "available": true
+    }
+  ]
+}
