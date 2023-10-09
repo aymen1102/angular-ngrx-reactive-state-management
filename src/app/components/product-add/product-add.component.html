@@ -1,29 +1,43 @@
 <div class="container" *ngIf="productFormGroup">
-    <form [formGroup]="productFormGroup">
-        <div class="form-group">
-            <label>Name</label>
-            <input type="text" class="form-control" formControlName="name">
-            <div *ngIf="productFormGroup.get('name')?.hasError('required') && productFormGroup.get('name')?.touched"
-                class="text-danger">
-                Name is required.
+    <ng-container *ngIf="state as data">
+        <ng-container *ngIf="data.dataState == StateEnum.LOADING">
+            Loading...
+        </ng-container>
+        <ng-container *ngIf="data.dataState == StateEnum.SUCCESS">
+            <div class="alert alert-success container ms-3 mt-3">
+                <span>Product Saved Successfully</span>
+                <button class="btn btn-success ms-2" (click)="newProduct()">New product</button>
             </div>
-        </div>
-        <div class="form-group">
-            <label>Price</label>
-            <input type="text" class="form-control" formControlName="price">
-        </div>
-        <div class="form-group">
-            <label>Quantity</label>
-            <input type="text" class="form-control" formControlName="quantity">
-        </div>
-        <div class="form-group">
-            <label>Selected</label>
-            <input type="checkbox" class="form-check" formControlName="selected">
-        </div>
-        <div class="form-group">
-            <label>Available</label>
-            <input type="checkbox" class="form-check" formControlName="available">
-        </div>
-        <button (click)="onSaveProduct()" class="btn btn-success" [disabled]="!productFormGroup.valid">Save</button>
-    </form>
+        </ng-container>
+        <ng-container *ngIf="data.dataState == StateEnum.NEW">
+            <form [formGroup]="productFormGroup">
+                <div class="form-gro up">
+                    <label>Name</label>
+                    <input type="text" class="form-control" formControlName="name">
+                    <div *ngIf="productFormGroup.get('name')?.hasError('required') && productFormGroup.get('name')?.touched"
+                        class="text-danger">
+                        Name is required.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="text" class="form-control" formControlName="price">
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="text" class="form-control" formControlName="quantity">
+                </div>
+                <div class="form-group">
+                    <label>Selected</label>
+                    <input type="checkbox" class="form-check" formControlName="selected">
+                </div>
+                <div class="form-group">
+                    <label>Available</label>
+                    <input type="checkbox" class="form-check" formControlName="available">
+                </div>
+                <button (click)="onSaveProduct()" class="btn btn-success"
+                    [disabled]="!productFormGroup.valid">Save</button>
+            </form>
+        </ng-container>
+    </ng-container>
 </div>

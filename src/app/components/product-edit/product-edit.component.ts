@@ -1,54 +1,60 @@
-import { EventDriverService } from './../../state/event.driver.service';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { ProductsService } from 'src/app/services/products.service';
-import { ProductActionsTypes } from 'src/app/state/product.state';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { EditProductAction, UpdateProductAction } from 'src/app/ngrx/products.actions';
+import { ProductsState, ProductsStateEnum } from 'src/app/ngrx/products.reducer';
 
 @Component({
   selector: 'app-product-edit',
   templateUrl: './product-edit.component.html',
   styleUrls: ['./product-edit.component.css']
 })
-export class ProductEditComponent implements OnInit {
+export class ProductEditComponent {
 
-  productId: number;
   productFormGroup?: FormGroup;
+  state?: ProductsState;
+  submitted: boolean = false;
+  productID: number;
+  formBuilt?: boolean;
+  readonly StateEnum = ProductsStateEnum;
 
   constructor(
     private activatedRoute: ActivatedRoute,
+    private router: Router,
     private fb: FormBuilder,
-    private productsService: ProductsService,
-    private eventDriverService: EventDriverService
+    private store: Store<any>
   ) {
-    this.productId = activatedRoute.snapshot.params['id'];
+    this.productID = activatedRoute.snapshot.params['id'];
   }
 
+
   ngOnInit(): void {
-    this.productsService.getProductById(this.productId)
-      .subscribe(
-        product =>
-          this.productFormGroup = this.fb.group({
-            id: [product.id, Validators.required],
-            name: [product.name, Validators.required],
-            price: [product.price, Validators.required],
-            quantity: [product.quantity, Validators.required],
-            selected: [product.selected, Validators.required],
-            available: [product.available, Validators.required],
-          })
-      );
+    this.store.dispatch(new EditProductAction(this.productID));
+    this.store.subscribe(state => {
+      this.state = state.catalogState;
+      if (this.state?.dataState == ProductsStateEnum.SUCCESS) {
+        this.productFormGroup = this.fb.group({
+          id: [this.state?.currentProduct?.id],
+          name: [this.state?.currentProduct?.name, Validators.required],
+          price: [this.state?.currentProduct?.price, Validators.required],
+          quantity: [this.state?.currentProduct?.quantity, Validators.required],
+          selected: [this.state?.currentProduct?.selected],
+          available: [this.state?.currentProduct?.available],
+        });
+        this.formBuilt = true;
+      }
+    })
   }
 
   onEditProduct() {
-    this.productsService.updateProduct(this.productFormGroup?.value)
-      .subscribe(
-        (product) => {
-          this.eventDriverService.publishEvent({
-            type: ProductActionsTypes.PRODUCT_UPDATED
-          });
-          alert("Product updated !")
-        }
-      );
+    this.submitted = true;
+    if (!this.productFormGroup?.valid) return;
+    this.store.dispatch(new UpdateProductAction(this.productFormGroup?.value));
+  }
+
+  okUpdated() {
+    this.router.navigateByUrl("/products")
   }
 
 }

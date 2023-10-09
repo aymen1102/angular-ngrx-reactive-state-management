@@ -1,7 +1,8 @@
-import { EventDriverService } from './../../../../state/event.driver.service';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { Product } from 'src/app/model/product.model';
-import { ActionEvent, AppDataState, ProductActionsTypes } from 'src/app/state/product.state';
+import { DeleteProductAction, EditProductAction, SelectProductAction } from 'src/app/ngrx/products.actions';
 
 @Component({
   selector: 'app-product-item',
@@ -10,33 +11,22 @@ import { ActionEvent, AppDataState, ProductActionsTypes } from 'src/app/state/pr
 })
 export class ProductItemComponent {
 
-  @Input() product?: Product;
-  // @Output() eventEmitter: EventEmitter<ActionEvent> = new EventEmitter();
+  @Input() product: Product | null = null;
 
-  constructor(private eventDriverService: EventDriverService) {}
+  constructor(
+    private store: Store<any>,
+    private router: Router) { }
 
-  onEditProduct(product: Product) {
-    // this.eventEmitter.emit({ type: ProductActionsTypes.EDIT_PRODUCT, payload: product  });
-    this.eventDriverService.publishEvent({
-      type: ProductActionsTypes.EDIT_PRODUCT, 
-      payload: product 
-    });
+  onSelectProduct(product: Product) {
+    this.store.dispatch(new SelectProductAction(product));
   }
 
   onDeleteProduct(product: Product) {
-    // this.eventEmitter.emit({ type: ProductActionsTypes.DELETE_PRODUCT, payload: product });
-    this.eventDriverService.publishEvent({
-      type: ProductActionsTypes.DELETE_PRODUCT, 
-      payload: product 
-    });
+    this.store.dispatch(new DeleteProductAction(product));
   }
 
-  onSelectProduct(product: Product) {
-    // this.eventEmitter.emit({ type: ProductActionsTypes.SELECT_PRODUCT, payload: product });
-    this.eventDriverService.publishEvent({
-      type: ProductActionsTypes.SELECT_PRODUCT, 
-      payload: product
-    });
+  onEditProduct(product: Product) {
+    this.router.navigateByUrl("/edit-product/" + product.id);
   }
 
 }

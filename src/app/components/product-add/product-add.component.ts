@@ -1,43 +1,50 @@
-import { EventDriverService } from './../../state/event.driver.service';
-import { ProductsService } from './../../services/products.service';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ProductActionsTypes } from 'src/app/state/product.state';
+import { Store } from '@ngrx/store';
+import { NewProductAction, SaveProductAction } from 'src/app/ngrx/products.actions';
+import { ProductsState, ProductsStateEnum } from 'src/app/ngrx/products.reducer';
 
 @Component({
   selector: 'app-product-add',
   templateUrl: './product-add.component.html',
   styleUrls: ['./product-add.component.css']
 })
-export class ProductAddComponent implements OnInit {
-  
+export class ProductAddComponent {
+
   productFormGroup?: FormGroup;
+  state?: ProductsState;
   submitted: boolean = false;
+  readonly StateEnum = ProductsStateEnum;
 
   constructor(
-    private productsService: ProductsService,
-    private eventDriverService: EventDriverService,
-    private fb: FormBuilder
-  ) {}
+    private fb: FormBuilder,
+    private store: Store<any>
+  ) { }
 
   ngOnInit(): void {
-    this.productFormGroup = this.fb.group({
-      name: ["", Validators.required],
-      price: [0, Validators.required],
-      quantity: [0, Validators.required],
-      selected: [true, Validators.required],
-      available: [true, Validators.required],
-    });
+    this.store.dispatch(new NewProductAction({}));
+    this.store.subscribe(state => {
+      this.state = state.catalogState;
+      if (this.state?.dataState == ProductsStateEnum.NEW) {
+        this.productFormGroup = this.fb.group({
+          name: ["", Validators.required],
+          price: [0, Validators.required],
+          quantity: [0, Validators.required],
+          selected: [true, Validators.required],
+          available: [true, Validators.required],
+        });
+      }
+    })
   }
 
   onSaveProduct() {
-    this.productsService.saveProduct(this.productFormGroup?.value)
-    .subscribe(data=> {
-      this.eventDriverService.publishEvent({
-        type: ProductActionsTypes.PRODUCT_ADDED
-      });
-      alert(`The product ${data.name} is created successfully !`);
-    })
+    this.submitted = true;
+    if (!this.productFormGroup?.valid) return;
+    this.store.dispatch(new SaveProductAction(this.productFormGroup?.value));
   };
+
+  newProduct() {
+    this.store.dispatch(new NewProductAction({}));
+  }
 
 }

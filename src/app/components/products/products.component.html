@@ -1,16 +1,19 @@
-<!-- 
-<app-products-nav-bar 
-    (productEventEmitter)="onActionEvent($event)">
-</app-products-nav-bar>
-
-<app-products-list 
-    [products$]="products$"
-    (productsEventEmitter)="onActionEvent($event)"
-></app-products-list>
--->
-
-
 <app-products-nav-bar></app-products-nav-bar>
-<app-products-list 
-    [products$]="products$"
-></app-products-list>
+<div class="container">
+    <ng-container *ngIf="productsState$ | async as state" [ngSwitch]="state.dataState">
+        <ng-container *ngSwitchCase="DataStateEnum.INITIAL">
+            <div class="p-2">Initial state</div>
+        </ng-container>
+        <ng-container *ngSwitchCase="DataStateEnum.LOADING">
+            <div class="p-2">Loading ...</div>
+        </ng-container>
+        <ng-container *ngSwitchCase="DataStateEnum.SUCCESS">
+            <app-products-list [state]="state"></app-products-list>
+        </ng-container>
+        <ng-container *ngSwitchCase="DataStateEnum.ERROR">
+            <div class="p-2 text-danger">
+                {{state.errorMessage | json}}
+            </div>
+        </ng-container>
+    </ng-container>
+</div>
